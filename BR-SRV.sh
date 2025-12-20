@@ -32,12 +32,12 @@ EOF
 
 # 4. Создание пользователя shuser
 echo "4. Создание пользователей..."
-useradd -m -s /bin/bash shuser -u 2026 -U
-usermod -aG sudo shuser
-echo "shuser:P@ssw0rd" | chpasswd
+useradd -m -s /bin/bash sshuser -u 2026 -U
+usermod -aG sudo sshuser
+echo "sshuser:P@ssw0rd" | chpasswd
 
 # Настройка sudo без пароля
-echo "shuser ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+echo "sshuser ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # 5. Настройка SSH
 echo "5. Настройка SSH..."
