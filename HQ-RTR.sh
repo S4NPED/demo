@@ -167,7 +167,6 @@ line vty
 !
 EOF
 
-
 # 12. Создание пользователя net_admin
 echo "12. Создание пользователей..."
 useradd -m -s /bin/bash net_admin -U
