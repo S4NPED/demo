@@ -8,9 +8,6 @@ echo "========================================"
 echo "Настройка BR-SRV (Debian 13)"
 echo "========================================"
 
-# 1. Настройка репозиториев
-echo "1. Настройка репозиториев..."
-sed -i '1s/^/#/' /etc/apt/sources.list
 apt update
 apt upgrade -y
 
@@ -76,11 +73,6 @@ chattr +i /etc/resolv.conf
 # 7. Настройка часового пояса
 echo "7. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
-
-# 8. Перезапуск служб
-echo "8. Перезапуск служб..."
-systemctl restart networking
-systemctl restart ssh
 
 # 9. Создание скрипта проверки
 cat > /usr/local/bin/check-br-srv << 'EOF'
