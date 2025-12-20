@@ -8,9 +8,6 @@ echo "========================================"
 echo "Настройка HQ-CLI (Debian 13)"
 echo "========================================"
 
-# 1. Настройка репозиториев
-echo "1. Настройка репозиториев..."
-sed -i '1s/^/#/' /etc/apt/sources.list
 apt update
 apt upgrade -y
 
@@ -58,14 +55,6 @@ Host *
     ServerAliveInterval 60
     ServerAliveCountMax 3
 EOF
-
-# 8. Перезапуск сети
-echo "8. Перезапуск сети..."
-systemctl restart networking
-
-# 9. Ожидание получения IP по DHCP
-echo "9. Ожидание DHCP..."
-sleep 5
 
 # 10. Создание скрипта проверки
 cat > /usr/local/bin/check-hq-cli << 'EOF'
