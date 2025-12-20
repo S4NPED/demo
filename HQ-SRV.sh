@@ -8,9 +8,6 @@ echo "========================================"
 echo "Настройка HQ-SRV (Debian 13)"
 echo "========================================"
 
-# 1. Настройка репозиториев
-echo "1. Настройка репозиториев..."
-sed -i '1s/^/#/' /etc/apt/sources.list
 apt update
 apt upgrade -y
 
@@ -35,12 +32,12 @@ EOF
 
 # 4. Создание пользователя shuser
 echo "4. Создание пользователей..."
-useradd -m -s /bin/bash shuser -u 2026 -U
-usermod -aG sudo shuser
-echo "shuser:P@ssw0rd" | chpasswd
+useradd -m -s /bin/bash sshuser -u 2026 -U
+usermod -aG sudo sshuser
+echo "sshuser:P@ssw0rd" | chpasswd
 
 # Настройка sudo без пароля
-echo "shuser ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+echo "sshuser ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # 5. Настройка SSH
 echo "5. Настройка SSH..."
@@ -149,12 +146,6 @@ chattr +i /etc/resolv.conf  # Запрещаем изменение
 # 8. Настройка часового пояса
 echo "7. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
-
-# 9. Перезапуск служб
-echo "8. Перезапуск служб..."
-systemctl restart networking
-systemctl restart ssh
-systemctl restart bind9
 
 # 10. Создание скрипта проверки
 cat > /usr/local/bin/check-hq-srv << 'EOF'
