@@ -2,15 +2,12 @@
 # Полная настройка HQ-RTR для демонстрационного экзамена 2026
 # Debian 13
 
-set -e
-
 echo "========================================"
 echo "Настройка HQ-RTR (Debian 13)"
 echo "========================================"
 
 # 1. Настройка репозиториев
 echo "1. Настройка репозиториев..."
-sed -i '1s/^/#/' /etc/apt/sources.list
 apt update
 apt upgrade -y
 
@@ -168,33 +165,6 @@ line vty
 !
 EOF
 
-# 11. Установка и настройка DHCP сервера
-echo "11. Установка DHCP сервера..."
-apt install -y isc-dhcp-server
-
-# Настраиваем интерфейс для DHCP
-cat > /etc/default/isc-dhcp-server << 'EOF'
-INTERFACESv4="vlan200"
-INTERFACESv6=""
-EOF
-
-# Настраиваем DHCP
-cat > /etc/dhcp/dhcpd.conf << 'EOF'
-option domain-name "au-team.irpo";
-option domain-name-servers 192.168.100.2;
-
-default-lease-time 600;
-max-lease-time 7200;
-
-ddns-update-style none;
-
-authoritative;
-
-subnet 192.168.100.32 netmask 255.255.255.240 {
-    range 192.168.100.34 192.168.100.47;
-    option routers 192.168.100.33;
-}
-EOF
 
 # 12. Создание пользователя net_admin
 echo "12. Создание пользователей..."
@@ -213,7 +183,7 @@ timedatectl set-timezone Asia/Krasnoyarsk
 echo "14. Перезапуск служб..."
 systemctl restart networking
 systemctl restart frr
-systemctl restart isc-dhcp-server
+
 
 # 15. Создание скрипта проверки
 cat > /usr/local/bin/check-hq-rtr << 'EOF'
