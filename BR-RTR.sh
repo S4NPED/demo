@@ -132,11 +132,6 @@ echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
 echo "9. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
 
-# 10. Перезапуск служб
-echo "10. Перезапуск служб..."
-systemctl restart networking
-systemctl restart frr
-
 # 11. Создание скрипта проверки
 cat > /usr/local/bin/check-br-rtr << 'EOF'
 #!/bin/bash
