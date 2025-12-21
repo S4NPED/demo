@@ -38,8 +38,8 @@ iface ens4 inet static
 address 192.168.200.1
 netmask 255.255.255.240
 
-auto gre0
-iface gre0 inet tunnel
+auto gre1
+iface gre1 inet tunnel
 address 10.10.0.2
 netmask 255.255.255.252
 mode gre
@@ -48,7 +48,7 @@ endpoint 172.16.1.2
 ttl 64
 
 post-up nft -f /etc/nftables.conf
-post-up ip link set gre0 up
+post-up ip link set gre1 up
 
 EOF
 
