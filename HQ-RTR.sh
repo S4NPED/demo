@@ -186,7 +186,6 @@ subnet 192.168.100.32 netmask 255.255.255.240 {
 }
 EOF
 
-
 # 13. Настройка часового пояса
 echo "13. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
