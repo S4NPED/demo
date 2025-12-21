@@ -34,7 +34,7 @@ EOF
 echo "4. Создание пользователей..."
 useradd -m -s /bin/bash sshuser -u 2026 -U
 usermod -aG sudo sshuser
-echo "sshuser:P@$$word" | chpasswd
+echo "sshuser:P@ssw0rd" | chpasswd
 
 # Настройка sudo без пароля
 echo "sshuser ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
