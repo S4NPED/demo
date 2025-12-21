@@ -48,8 +48,8 @@ iface vlan999 inet static
 address 192.168.100.49
 netmask 255.255.255.248
 
-auto gre0
-iface gre0 inet tunnel
+auto gre1
+iface gre1 inet tunnel
 address 10.10.0.1
 netmask 255.255.255.252
 mode gre
@@ -59,7 +59,7 @@ ttl 64
 
 post-up nft -f /etc/nftables.conf
 post-up ip link set hq-sw up
-post-up ip link set gre0 up
+post-up ip link set gre1 up
 EOF
 
 # 4. Включение IP forwarding
