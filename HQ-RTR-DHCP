@@ -8,31 +8,6 @@ echo "========================================"
 echo "Настройка HQ-RTR (Debian 13)"
 echo "========================================"
 
-# 3. Перезапуск FRR
-echo "Перезапускаем FRR..."
-systemctl restart frr
-
-# 4. Настройка OSPF через vtysh
-echo "Настраиваем OSPF..."
-vtysh << EOF
-conf t
-router ospf
-router-id 1.1.1.1
-no passive-interface default
-network 192.168.100.0/27 area 0
-network 192.168.100.32/28 area 0
-network 10.10.0.0/30 area 0
-area 0 authentication
-int tun1
-no ip ospf passive
-no ip ospf network broadcast
-ip ospf authentication
-ip ospf authentication-key password
-exit
-exit
-wr
-EOF
-
 # 11. Установка и настройка DHCP сервера
 echo "11. Установка DHCP сервера..."
 apt install -y isc-dhcp-server
