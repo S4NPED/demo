@@ -137,25 +137,32 @@ sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
 echo "Перезапускаем FRR..."
 systemctl restart frr
 
-# 4. Настройка OSPF через vtysh
-echo "Настраиваем OSPF..."
-vtysh << EOF
-conf t
+# Создаем конфигурацию OSPF
+cat > /etc/frr/frr.conf << 'EOF'
+frr version 8.1
+frr defaults traditional
+hostname router
+log syslog informational
+no ipv6 forwarding
+service integrated-vtysh-config
+!
+interface gre1
+ ip ospf authentication
+ ip ospf authentication-key password
+ ip ospf network point-to-point
+ no ip ospf passive
+!
 router ospf
-router-id 1.1.1.1
-no passive-interface default
-network 192.168.100.0/27 area 0
-network 192.168.100.32/28 area 0
-network 10.10.0.0/30 area 0
-area 0 authentication
-int gre1
-no ip ospf passive
-no ip ospf network broadcast
-ip ospf authentication
-ip ospf authentication-key password
-exit
-exit
-wr
+ ospf router-id 1.1.1.1
+ network 192.168.100.0/27 area 0
+ network 192.168.100.32/28 area 0
+ network 10.10.0.0/30 area 0
+ area 0 authentication
+ passive-interface default
+ no passive-interface gre1
+!
+line vty
+!
 EOF
 
 # 11. Установка и настройка DHCP сервера
