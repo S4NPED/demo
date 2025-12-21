@@ -67,8 +67,8 @@ echo "6. Установка DNS сервера..."
 apt install -y bind9 bind9-utils
 
 # Создаем директории
-mkdir -p /etc/bind/zones
-mkdir -p /var/cache/bind/master
+mkdir /etc/bind/zones
+mkdir /var/cache/bind/master
 
 # Настраиваем options
 cat > /etc/bind/named.conf.options << 'EOF'
@@ -137,7 +137,10 @@ EOF
 
 # Настраиваем права
 chown -R root /etc/bind/zones
-chmod 0640 /etc/bind/zones/*
+chown 0640 /etc/bind/zones/*
+
+cp /etc/bind/zones/au-team.db /var/cache/bind/master
+cp /etc/bind/zones/au-team_rev.db /var/cache/bind/master
 
 # 7. Настройка resolv.conf
 echo "nameserver 192.168.100.2" > /etc/resolv.conf
