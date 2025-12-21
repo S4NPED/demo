@@ -101,28 +101,28 @@ apt install -y frr
 # Включаем OSPF демон
 sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
 
-# Настраиваем FRR
-cat > /etc/frr/frr.conf << 'EOF'
-frr version 8.5.2
-frr defaults traditional
-hostname br-rtr.au-team.irpo
-log syslog informational
-no ipv6 forwarding
-service integrated-vtysh-config
-!
+# 3. Перезапуск FRR
+echo "Перезапускаем FRR..."
+systemctl restart frr
+
+# 4. Настройка OSPF через vtysh
+echo "Настраиваем OSPF..."
+vtysh << EOF
+conf t
 router ospf
- router-id 2.2.2.2
- network 192.168.200.0/28 area 0
- network 10.10.0.0/30 area 0
- area 0 authentication
-!
-interface gre0
- ip ospf authentication
- ip ospf authentication-key password
- no ip ospf passive
-!
-line vty
-!
+router-id 2.2.2.2
+no passive-interface default
+network 192.168.200.0/28 area 0
+network 10.10.0.0/30 area 0
+area 0 authentication
+int tunl
+no ip ospf passive
+no ip ospf network broadcast
+ip ospf authentication
+ip ospf authentication-key password
+exit
+exit
+wr
 EOF
 
 # 9. Настройка часового пояса
