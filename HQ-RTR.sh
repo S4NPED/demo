@@ -31,7 +31,23 @@ address 172.16.1.2
 netmask 255.255.255.240
 gateway 172.16.1.1
 
+auto vlan100
+iface vlan100 inet static
+address 192.168.100.1
+netmask 255.255.255.224
+
+auto vlan200
+iface vlan200 inet static
+address 192.168.100.33
+netmask 255.255.255.240
+
+auto vlan999
+iface vlan999 inet static
+address 192.168.100.49
+netmask 255.255.255.248
+
 post-up nft -f /etc/nftables.conf
+post-up ip link set hq-sw up
 EOF
 
 # 4. Включение IP forwarding
@@ -98,38 +114,6 @@ ovs-vsctl add-port hq-sw vlan100 tag=100 -- set interface vlan100 type=internal
 ovs-vsctl add-port hq-sw vlan200 tag=200 -- set interface vlan200 type=internal
 ovs-vsctl add-port hq-sw vlan999 tag=999 -- set interface vlan999 type=internal
 
-# 8. Обновляем конфигурацию сети с VLAN
-echo "8. Обновление конфигурации сети..."
-cat > /etc/network/interfaces << 'EOF'
-source /etc/network/interfaces.d/*
-
-auto lo
-iface lo inet loopback
-
-auto ens3
-iface ens3 inet static
-address 172.16.1.2
-netmask 255.255.255.240
-gateway 172.16.1.1
-
-auto vlan100
-iface vlan100 inet static
-address 192.168.100.1
-netmask 255.255.255.224
-
-auto vlan200
-iface vlan200 inet static
-address 192.168.100.33
-netmask 255.255.255.240
-
-auto vlan999
-iface vlan999 inet static
-address 192.168.100.49
-netmask 255.255.255.248
-
-post-up nft -f /etc/nftables.conf
-post-up ip link set hq-sw up
-EOF
 
 # 9. Настройка GRE туннеля
 echo "9. Настройка GRE туннеля..."
