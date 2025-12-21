@@ -69,6 +69,15 @@ table inet filter {
 }
 EOF
 
+# 12. Создание пользователя net_admin
+echo "12. Создание пользователей..."
+useradd -m -s /bin/bash net_admin -U
+usermod -aG sudo net_admin
+echo "net_admin:P@ssw0rd" | chpasswd
+
+# Настройка sudo без пароля
+echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 # 6. Установка Open vSwitch для VLAN
 echo "6. Установка Open vSwitch..."
 apt install -y openvswitch-switch
@@ -142,68 +151,10 @@ apt install -y frr
 # Включаем OSPF демон
 sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
 
-# Настраиваем FRR
-cat > /etc/frr/frr.conf << 'EOF'
-frr version 8.5.2
-frr defaults traditional
-hostname hq-rtr.au-team.irpo
-log syslog informational
-no ipv6 forwarding
-service integrated-vtysh-config
-!
-router ospf
- router-id 1.1.1.1
- network 192.168.100.0/27 area 0
- network 192.168.100.32/28 area 0
- network 10.10.0.0/30 area 0
- area 0 authentication
-!
-interface gre0
- ip ospf authentication
- ip ospf authentication-key password
- no ip ospf passive
-!
-line vty
-!
-EOF
-
-# 12. Создание пользователя net_admin
-echo "12. Создание пользователей..."
-useradd -m -s /bin/bash net_admin -U
-usermod -aG sudo net_admin
-echo "net_admin:P@ssw0rd" | chpasswd
-
-# Настройка sudo без пароля
-echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 # 13. Настройка часового пояса
 echo "13. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
 
-# 15. Создание скрипта проверки
-cat > /usr/local/bin/check-hq-rtr << 'EOF'
-#!/bin/bash
-echo "=== Статус HQ-RTR ==="
-echo "1. Интерфейсы:"
-ip -br a
-echo -e "\n2. VLAN:"
-ovs-vsctl show
-echo -e "\n3. Маршруты:"
-ip route
-echo -e "\n4. OSPF соседи:"
-vtysh -c "show ip ospf neighbor" 2>/dev/null || echo "FRR не запущен"
-echo -e "\n5. DHCP аренды:"
-journalctl -u isc-dhcp-server -n 20 --no-pager
-echo -e "\n6. Ping тесты:"
-for ip in 172.16.1.1 192.168.100.2 192.168.100.34 10.10.0.2; do
-    echo -n "Ping $ip: "
-    ping -c 1 -W 1 $ip >/dev/null 2>&1 && echo "OK" || echo "FAIL"
-done
-EOF
-
-chmod +x /usr/local/bin/check-hq-rtr
-
 echo "========================================"
 echo "Настройка HQ-RTR завершена!"
 echo "========================================"
-echo "Используйте: check-hq-rtr для проверки"
