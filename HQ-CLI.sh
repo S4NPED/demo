@@ -38,16 +38,6 @@ EOF
 echo "5. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
 
-# 6. Установка необходимых утилит
-echo "6. Установка утилит..."
-apt install -y \
-    openssh-client \
-    dnsutils \
-    net-tools \
-    iputils-ping \
-    curl \
-    wget
-
 # 7. Настройка SSH клиента
 echo "7. Настройка SSH клиента..."
 cat > /etc/ssh/ssh_config.d/custom.conf << 'EOF'
@@ -56,30 +46,6 @@ Host *
     ServerAliveCountMax 3
 EOF
 
-# 10. Создание скрипта проверки
-cat > /usr/local/bin/check-hq-cli << 'EOF'
-#!/bin/bash
-echo "=== Статус HQ-CLI ==="
-echo "1. Интерфейсы:"
-ip -br a
-echo -e "\n2. Маршруты:"
-ip route
-echo -e "\n3. DNS:"
-cat /etc/resolv.conf
-echo -e "\n4. DHCP:"
-journalctl -u systemd-networkd -n 10 --no-pager 2>/dev/null | grep DHCP || dhclient -v ens3 2>&1 | tail -5
-echo -e "\n5. Ping тесты:"
-for target in 192.168.100.1 192.168.100.2 192.168.200.2 google.com; do
-    echo -n "Ping $target: "
-    ping -c 1 -W 1 $target >/dev/null 2>&1 && echo "OK" || echo "FAIL"
-done
-echo -e "\n6. SSH тест к HQ-SRV:"
-timeout 2 ssh -o ConnectTimeout=1 -p 2026 shuser@192.168.100.2 "echo SSH доступен" 2>/dev/null && echo "SSH: OK" || echo "SSH: FAIL"
-EOF
-
-chmod +x /usr/local/bin/check-hq-cli
-
 echo "========================================"
 echo "Настройка HQ-CLI завершена!"
 echo "========================================"
-echo "Используйте: check-hq-cli для проверки"
