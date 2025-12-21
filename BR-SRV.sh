@@ -68,7 +68,6 @@ cat > /etc/resolv.conf << 'EOF'
 nameserver 192.168.100.2
 search au-team.irpo
 EOF
-chattr +i /etc/resolv.conf
 
 # 7. Настройка часового пояса
 echo "7. Настройка часового пояса..."
