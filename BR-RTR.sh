@@ -15,6 +15,10 @@ apt upgrade -y
 echo "2. Настройка имени хоста..."
 hostnamectl set-hostname br-rtr.au-team.irpo
 
+# 6. Настройка GRE туннеля
+echo "6. Настройка GRE туннеля..."
+apt install -y network-manager
+
 # 3. Настройка сети
 echo "3. Настройка сети..."
 cat > /etc/network/interfaces << 'EOF'
@@ -34,6 +38,13 @@ iface ens4 inet static
 address 192.168.200.1
 netmask 255.255.255.240
 
+auto gre0
+iface gre0 inet static
+address 10.10.0.2
+netmask 255.255.255.252
+pre-up ip tunnel add gre0 mode gre local 172.16.2.2 remote 172.16.1.2 ttl 64
+
+post-up ip link set gre0 up
 post-up nft -f /etc/nftables.conf
 EOF
 
@@ -80,19 +91,6 @@ echo "net_admin:P@ssw0rd" | chpasswd
 
 # Настройка sudo без пароля
 echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
-
-# 6. Настройка GRE туннеля
-echo "6. Настройка GRE туннеля..."
-apt install -y network-manager
-
-cat > /etc/network/interfaces.d/gre << 'EOF'
-auto gre0
-iface gre0 inet static
-address 10.10.0.2
-netmask 255.255.255.252
-pre-up ip tunnel add gre0 mode gre local 172.16.2.2 remote 172.16.1.2 ttl 64
-post-up ip link set gre0 up
-EOF
 
 # 7. Установка и настройка FRR (OSPF)
 echo "7. Установка FRR для OSPF..."
