@@ -139,7 +139,7 @@ systemctl restart frr
 
 # Создаем конфигурацию OSPF
 cat > /etc/frr/frr.conf << 'EOF'
-frr version 8.1
+frr version 10.3
 frr defaults traditional
 hostname router
 log syslog informational
