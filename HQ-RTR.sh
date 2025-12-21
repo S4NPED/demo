@@ -151,6 +151,31 @@ apt install -y frr
 # Включаем OSPF демон
 sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
 
+# 3. Перезапуск FRR
+echo "Перезапускаем FRR..."
+systemctl restart frr
+
+# 4. Настройка OSPF через vtysh
+echo "Настраиваем OSPF..."
+vtysh << EOF
+conf t
+router ospf
+router-id 1.1.1.1
+no passive-interface default
+network 192.168.100.0/27 area 0
+network 192.168.100.32/28 area 0
+network 10.10.0.0/30 area 0
+area 0 authentication
+int tun1
+no ip ospf passive
+no ip ospf network broadcast
+ip ospf authentication
+ip ospf authentication-key password
+exit
+exit
+wr
+EOF
+
 # 13. Настройка часового пояса
 echo "13. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
