@@ -55,7 +55,7 @@ EOF
 # Настраиваем SSH
 cat > /etc/ssh/sshd_config.d/custom.conf << 'EOF'
 Port 2026
-AllowUsers shuser
+AllowUsers sshuser
 MaxAuthTries 2
 Banner /etc/ssh_banner
 PasswordAuthentication yes
