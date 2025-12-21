@@ -38,15 +38,27 @@ iface ens4 inet static
 address 192.168.200.1
 netmask 255.255.255.240
 
-auto gre0
-iface gre0 inet static
-address 10.10.0.2
-netmask 255.255.255.252
-pre-up ip tunnel add gre0 mode gre local 172.16.2.2 remote 172.16.1.2 ttl 64
-
-post-up ip link set gre0 up
 post-up nft -f /etc/nftables.conf
+post-up ip link set gre0 up
+
 EOF
+
+# 2. Создаем GRE-туннель через nmcli
+echo "Создаем GRE-туннель..."
+nmcli connection add type ip-tunnel \
+    ifname gre0 \
+    mode gre \
+    remote 172.16.2.2 \
+    local 172.16.1.2 \
+    dev ens3 \
+    connection.autoconnect yes \
+    connection.id gre-tunnel \
+    ipv4.method manual \
+    ipv4.addresses 10.10.0.1/30
+
+# 3. Настраиваем дополнительные параметры
+echo "Настраиваем параметры туннеля..."
+nmcli connection modify gre-tunnel ip-tunnel.ttl 64
 
 # 4. Включение IP forwarding
 echo "4. Включение IP forwarding..."
