@@ -88,17 +88,17 @@ EOF
 cat > /etc/bind/named.conf.local << 'EOF'
 zone "au-team.irpo" {
     type master;
-    file "/var/cache/bind/master/au-team.db";
+    file "master/au-team.db";
 };
 
 zone "100.168.192.in-addr.arpa" {
     type master;
-    file "/var/cache/bind/master/au-team_rev.db";
+    file "master/au-team_rev.db";
 };
 EOF
 
 # Создаем прямую зону
-cat > /var/cache/bind/master/au-team.db << 'EOF'
+cat > /etc/bind/zones/au-team.db << 'EOF'
 $TTL 604800
 @   IN  SOA localhost. root.localhost. (
     2          ; Serial
@@ -120,7 +120,7 @@ wiki     IN  CNAME hq-rtr.au-team.irpo.
 EOF
 
 # Создаем обратную зону
-cat > /var/cache/bind/master/au-team_rev.db << 'EOF'
+cat > /etc/bind/zones/au-team_rev.db << 'EOF'
 $TTL 604800
 @   IN  SOA localhost. root.localhost. (
     1          ; Serial
@@ -132,48 +132,20 @@ $TTL 604800
 @   IN  NS  au-team.irpo.
 1   IN  PTR hq-rtr.au-team.irpo.
 2   IN  PTR hq-srv.au-team.irpo.
-35  IN  PTR hq-cli.au-team.irpo.
+66  IN  PTR hq-cli.au-team.irpo.
 EOF
 
 # Настраиваем права
-chown -R bind:bind /var/cache/bind
-chmod 644 /var/cache/bind/master/*
+chown -R root /etc/bind/zones
+chmod 0640 /etc/bind/zones/*
 
 # 7. Настройка resolv.conf
 echo "nameserver 192.168.100.2" > /etc/resolv.conf
-chattr +i /etc/resolv.conf  # Запрещаем изменение
 
 # 8. Настройка часового пояса
 echo "7. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
 
-# 10. Создание скрипта проверки
-cat > /usr/local/bin/check-hq-srv << 'EOF'
-#!/bin/bash
-echo "=== Статус HQ-SRV ==="
-echo "1. Интерфейсы:"
-ip -br a
-echo -e "\n2. Пользователи:"
-id shuser
-echo -e "\n3. SSH порт:"
-ss -tlnp | grep :2026
-echo -e "\n4. DNS служба:"
-systemctl status bind9 --no-pager
-echo -e "\n5. DNS разрешение:"
-for host in hq-srv hq-rtr br-srv au-team.irpo; do
-    echo -n "$host: "
-    host $host.au-team.irpo 2>/dev/null | grep address || echo "FAIL"
-done
-echo -e "\n6. Ping тесты:"
-for ip in 192.168.100.1 192.168.100.34 192.168.200.2; do
-    echo -n "Ping $ip: "
-    ping -c 1 -W 1 $ip >/dev/null 2>&1 && echo "OK" || echo "FAIL"
-done
-EOF
-
-chmod +x /usr/local/bin/check-hq-srv
-
 echo "========================================"
 echo "Настройка HQ-SRV завершена!"
 echo "========================================"
-echo "Используйте: check-hq-srv для проверки"
