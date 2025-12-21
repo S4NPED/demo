@@ -72,6 +72,15 @@ table inet filter {
 }
 EOF
 
+# 8. Создание пользователя net_admin
+echo "8. Создание пользователей..."
+useradd -m -s /bin/bash net_admin -U
+usermod -aG sudo net_admin
+echo "net_admin:P@ssw0rd" | chpasswd
+
+# Настройка sudo без пароля
+echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+
 # 6. Настройка GRE туннеля
 echo "6. Настройка GRE туннеля..."
 apt install -y network-manager
@@ -116,39 +125,10 @@ line vty
 !
 EOF
 
-# 8. Создание пользователя net_admin
-echo "8. Создание пользователей..."
-useradd -m -s /bin/bash net_admin -U
-usermod -aG sudo net_admin
-echo "net_admin:P@ssw0rd" | chpasswd
-
-# Настройка sudo без пароля
-echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 # 9. Настройка часового пояса
 echo "9. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
 
-# 11. Создание скрипта проверки
-cat > /usr/local/bin/check-br-rtr << 'EOF'
-#!/bin/bash
-echo "=== Статус BR-RTR ==="
-echo "1. Интерфейсы:"
-ip -br a
-echo -e "\n2. Маршруты:"
-ip route
-echo -e "\n3. OSPF соседи:"
-vtysh -c "show ip ospf neighbor" 2>/dev/null || echo "FRR не запущен"
-echo -e "\n4. Ping тесты:"
-for ip in 172.16.2.1 192.168.200.2 10.10.0.1 192.168.100.2; do
-    echo -n "Ping $ip: "
-    ping -c 1 -W 1 $ip >/dev/null 2>&1 && echo "OK" || echo "FAIL"
-done
-EOF
-
-chmod +x /usr/local/bin/check-br-rtr
-
 echo "========================================"
 echo "Настройка BR-RTR завершена!"
 echo "========================================"
-echo "Используйте: check-br-rtr для проверки"
