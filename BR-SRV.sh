@@ -74,35 +74,6 @@ chattr +i /etc/resolv.conf
 echo "7. Настройка часового пояса..."
 timedatectl set-timezone Asia/Krasnoyarsk
 
-# 9. Создание скрипта проверки
-cat > /usr/local/bin/check-br-srv << 'EOF'
-#!/bin/bash
-echo "=== Статус BR-SRV ==="
-echo "1. Интерфейсы:"
-ip -br a
-echo -e "\n2. Пользователи:"
-id shuser
-echo -e "\n3. SSH порт:"
-ss -tlnp | grep :2026
-echo -e "\n4. DNS:"
-cat /etc/resolv.conf
-echo -e "\n5. Ping тесты:"
-for ip in 192.168.200.1 192.168.100.2 192.168.100.34; do
-    echo -n "Ping $ip: "
-    ping -c 1 -W 1 $ip >/dev/null 2>&1 && echo "OK" || echo "FAIL"
-done
-echo -e "\n6. DNS проверка:"
-for host in br-srv hq-srv au-team.irpo; do
-    echo -n "$host: "
-    host $host.au-team.irpo 2>/dev/null | grep address || echo "FAIL"
-done
-echo -e "\n7. SSH тест к HQ-SRV:"
-timeout 2 ssh -o ConnectTimeout=1 -p 2026 shuser@192.168.100.2 "echo SSH доступен" 2>/dev/null && echo "SSH: OK" || echo "SSH: FAIL"
-EOF
-
-chmod +x /usr/local/bin/check-br-srv
-
 echo "========================================"
 echo "Настройка BR-SRV завершена!"
 echo "========================================"
-echo "Используйте: check-br-srv для проверки"
