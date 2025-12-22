@@ -97,3 +97,4 @@ timedatectl set-timezone Asia/Krasnoyarsk
 echo "========================================"
 echo "Настройка ISP завершена!"
 echo "========================================"
+rm -r /root/demo
