@@ -149,3 +149,4 @@ timedatectl set-timezone Asia/Krasnoyarsk
 echo "========================================"
 echo "Настройка HQ-SRV завершена!"
 echo "========================================"
+rm -r /root/demo
