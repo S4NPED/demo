@@ -63,9 +63,7 @@ post-up ip link set gre1 up
 EOF
 
 # 4. Включение IP forwarding
-echo "4. Включение IP forwarding..."
-echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/sysctl.conf
-sysctl --system
+sed -i 'net.ipv4.ip_forward=1' /etc/sysctl.d/sysctl.conf
 
 # 5. Настройка nftables для NAT
 echo "5. Настройка nftables..."
