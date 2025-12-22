@@ -57,9 +57,8 @@ EOF
 echo "Файл /etc/network/interfaces настроен"
 
 # 5. Включение IP forwarding
-echo "5. Включение IP forwarding..."
-echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/sysctl.conf
-sysctl --system
+echo > /etc/sysctl.d/sysctl.conf
+sed -i '1i net.ipv4.ip_forward=1' /etc/sysctl.d/sysctl.conf
 
 # 6. Настройка nftables для NAT
 echo "6. Настройка nftables..."
