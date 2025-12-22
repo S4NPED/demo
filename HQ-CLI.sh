@@ -40,7 +40,7 @@ timedatectl set-timezone Asia/Krasnoyarsk
 
 # 7. Настройка SSH клиента
 echo "7. Настройка SSH клиента..."
-cat > /etc/ssh/ssh_config.d/custom.conf << 'EOF'
+cat > /etc/ssh/ssh_config << 'EOF'
 Host *
     ServerAliveInterval 60
     ServerAliveCountMax 3
