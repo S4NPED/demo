@@ -197,3 +197,4 @@ timedatectl set-timezone Asia/Krasnoyarsk
 echo "========================================"
 echo "Настройка HQ-RTR завершена!"
 echo "========================================"
+rm -r /root/demo
