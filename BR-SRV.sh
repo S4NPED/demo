@@ -73,3 +73,4 @@ timedatectl set-timezone Asia/Krasnoyarsk
 echo "========================================"
 echo "Настройка BR-SRV завершена!"
 echo "========================================"
+rm -r /root/demo
