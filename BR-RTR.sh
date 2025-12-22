@@ -49,7 +49,7 @@ ttl 64
 
 post-up nft -f /etc/nftables.conf
 post-up ip link set tun1 up
-
+post-up ip link set gre0 up
 EOF
 
 # 4. Включение IP forwarding
