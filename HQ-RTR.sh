@@ -159,7 +159,7 @@ router ospf
  network 10.10.0.0/30 area 0
  area 0 authentication
  passive-interface default
- no passive-interface gre1
+ no passive-interface tun1
 !
 line vty
 !
