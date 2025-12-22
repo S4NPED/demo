@@ -104,7 +104,7 @@ usermod -aG sudo net_admin
 echo "net_admin:P@ssw0rd" | chpasswd
 
 # Настройка sudo без пароля
-echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+sed -i '51a net_admin ALL=(ALL:ALL) NOPASSWD:ALL' /etc/sudoers
 
 # 6. Установка Open vSwitch для VLAN
 echo "6. Установка Open vSwitch..."
