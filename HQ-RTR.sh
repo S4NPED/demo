@@ -48,8 +48,8 @@ iface vlan999 inet static
 address 192.168.100.49
 netmask 255.255.255.248
 
-auto gre1
-iface gre1 inet tunnel
+auto tun1
+iface tun1 inet tunnel
 address 10.10.0.1
 netmask 255.255.255.252
 mode gre
@@ -63,7 +63,8 @@ post-up ip link set gre1 up
 EOF
 
 # 4. Включение IP forwarding
-sed -i 'net.ipv4.ip_forward=1' /etc/sysctl.d/sysctl.conf
+echo > /etc/sysctl.d/sysctl.conf
+sed -i '1l net.ipv4.ip_forward=1' /etc/sysctl.d/sysctl.conf
 
 # 5. Настройка nftables для NAT
 echo "5. Настройка nftables..."
@@ -144,7 +145,7 @@ log syslog informational
 no ipv6 forwarding
 service integrated-vtysh-config
 !
-interface gre1
+interface tun1
  ip ospf authentication
  ip ospf authentication-key password
  ip ospf network point-to-point
