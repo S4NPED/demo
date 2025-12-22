@@ -53,7 +53,7 @@ cat > /etc/ssh_banner << 'EOF'
 EOF
 
 # Настраиваем SSH
-cat > /etc/ssh/sshd_config.d/custom.conf << 'EOF'
+cat > /etc/ssh/sshd_config << 'EOF'
 Port 2026
 AllowUsers sshuser
 MaxAuthTries 2
