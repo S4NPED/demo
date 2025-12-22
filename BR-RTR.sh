@@ -53,9 +53,7 @@ post-up ip link set gre1 up
 EOF
 
 # 4. Включение IP forwarding
-echo "4. Включение IP forwarding..."
-echo "net.ipv4.ip_forward=1" > /etc/sysctl.d/sysctl.conf
-sysctl --system
+sed -i 'net.ipv4.ip_forward=1' /etc/sysctl.d/sysctl.conf
 
 # 5. Настройка nftables для NAT
 echo "5. Настройка nftables..."
@@ -94,7 +92,7 @@ usermod -aG sudo net_admin
 echo "net_admin:P@ssw0rd" | chpasswd
 
 # Настройка sudo без пароля
-echo "net_admin ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+sed -i '51a net_admin ALL=(ALL:ALL) NOPASSWD:ALL' /etc/sudoers
 
 # 7. Установка и настройка FRR (OSPF)
 echo "7. Установка FRR для OSPF..."
