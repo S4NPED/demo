@@ -38,8 +38,8 @@ iface ens4 inet static
 address 192.168.200.1
 netmask 255.255.255.240
 
-auto gre1
-iface gre1 inet tunnel
+auto tun1
+iface tun1 inet tunnel
 address 10.10.0.2
 netmask 255.255.255.252
 mode gre
@@ -48,7 +48,7 @@ endpoint 172.16.1.2
 ttl 64
 
 post-up nft -f /etc/nftables.conf
-post-up ip link set gre1 up
+post-up ip link set tun1 up
 
 EOF
 
@@ -115,7 +115,7 @@ no passive-interface default
 network 192.168.200.0/28 area 0
 network 10.10.0.0/30 area 0
 area 0 authentication
-int gre1
+int tun1
 no ip ospf passive
 no ip ospf network broadcast
 ip ospf authentication
