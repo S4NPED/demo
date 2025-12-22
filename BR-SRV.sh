@@ -37,7 +37,7 @@ usermod -aG sudo sshuser
 echo "sshuser:P@ssw0rd" | chpasswd
 
 # Настройка sudo без пароля
-echo "sshuser ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
+sed -i '51a sshuser ALL=(ALL:ALL) NOPASSWD:ALL' /etc/sudoers
 
 # 5. Настройка SSH
 echo "5. Настройка SSH..."
