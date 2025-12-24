@@ -28,6 +28,7 @@ netmask 255.255.255.240
 
 post-up nft -f /etc/nftables.conf
 EOF
+echo > /etc/sysctl.d/sysctl.conf
 sed -i '1i net.ipv4.ip_forward=1' /etc/sysctl.d/sysctl.conf
 cat > /etc/nftables.conf << 'EOF'
 #!/usr/sbin/nft -f
