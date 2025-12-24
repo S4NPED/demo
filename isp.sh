@@ -10,17 +10,14 @@ source /etc/network/interfaces.d/*
 auto lo
 iface lo inet loopback
 
-# Интерфейс к магистральному провайдеру (DHCP)
 auto ens3
 iface ens3 inet dhcp
 
-# Интерфейс к HQ-RTR
 auto ens4
 iface ens4 inet static
 address 172.16.1.1
 netmask 255.255.255.240
 
-# Интерфейс к BR-RTR
 auto ens5
 iface ens5 inet static
 address 172.16.2.1
