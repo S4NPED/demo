@@ -1,4 +1,4 @@
-apt remove git
+apt remove git -y
 rm -r /root/demo
 cat > /etc/network/interfaces << 'EOF'
 # This file describes the network interfaces available
