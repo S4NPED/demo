@@ -15,13 +15,11 @@ iface ens3 inet dhcp
 
 auto ens4
 iface ens4 inet static
-address 172.16.1.1
-netmask 255.255.255.240
+address 172.16.1.1/28
 
 auto ens5
 iface ens5 inet static
-address 172.16.2.1
-netmask 255.255.255.240
+address 172.16.2.1/28
 
 post-up nft -f /etc/nftables.conf
 EOF
