@@ -1,100 +1,86 @@
 #!/bin/bash
-# Полная настройка ISP для демонстрационного экзамена 2026
-# Специальность 09.02.06 Сетевое и системное администрирование
-# Debian 13
+# Универсальная настройка сканера в ALT Linux (USB и сетевой)
 
-echo "========================================"
-echo "Настройка ISP (Debian 13)"
-echo "========================================"
+set -e  # остановка при ошибке
 
-apt update
+# Проверка прав
+if [ "$EUID" -ne 0 ]; then
+    echo "❌ Запустите скрипт с sudo: sudo ./setup-scanner.sh"
+    exit 1
+fi
 
-# 3. Настройка имени хоста
-echo "3. Настройка имени хоста..."
-hostnamectl set-hostname isp.au-team.irpo
+USER_NAME=${SUDO_USER:-$USER}
+echo "👤 Настройка для пользователя: $USER_NAME"
 
-# 4. Настройка сети
-echo "4. Настройка сети..."
+echo "=== 🔧 Установка пакетов ==="
+apt-get update
+apt-get install -y sane sane-utils simple-scan
 
-# Создаем backup оригинального файла
-cp /etc/network/interfaces /etc/network/interfaces.backup
+# Пакет для сетевых сканеров (поддержка eSCL, AirScan)
+apt-get install -y sane-airscan || echo "⚠️  Пакет sane-airscan не найден, возможно, сетевые сканеры будут работать через другие бэкенды."
 
-# Создаем новый конфигурационный файл
-cat > /etc/network/interfaces << 'EOF'
-# This file describes the network interfaces available
-# and how to activate them. For more information, see interfaces(5).
+echo "=== 👥 Добавление пользователя в группы ==="
+usermod -aG lp $USER_NAME
+usermod -aG scanner $USER_NAME
 
-source /etc/network/interfaces.d/*
+echo "=== 🔍 Поиск доступных сканеров ==="
+sane-find-scanner -q
+echo "Список устройств:"
+scanimage -L
 
-# The loopback network interface
-auto lo
-iface lo inet loopback
-
-# Интерфейс к магистральному провайдеру (DHCP)
-auto ens3
-iface ens3 inet dhcp
-
-# Интерфейс к HQ-RTR
-auto ens4
-iface ens4 inet static
-address 172.16.1.1
-netmask 255.255.255.240
-
-# Интерфейс к BR-RTR
-auto ens5
-iface ens5 inet static
-address 172.16.2.1
-netmask 255.255.255.240
-
-post-up nft -f /etc/nftables.conf
-EOF
-
-echo "Файл /etc/network/interfaces настроен"
-
-# 5. Включение IP forwarding
-echo > /etc/sysctl.d/sysctl.conf
-sed -i '1i net.ipv4.ip_forward=1' /etc/sysctl.d/sysctl.conf
-
-# 6. Настройка nftables для NAT
-echo "6. Настройка nftables..."
-
-# Устанавливаем nftables если нет
-apt install -y nftables
-
-# Создаем конфигурацию nftables
-cat > /etc/nftables.conf << 'EOF'
-#!/usr/sbin/nft -f
-
-flush ruleset
-
-table ip nat {
-    chain postrouting {
-        type nat hook postrouting priority 100; policy accept
-        meta l4proto { gre, ipip, ospf } counter return
-        masquerade
-    }
+# Функция выбора и запоминания устройства
+choose_device() {
+    local devices
+    devices=$(scanimage -L | grep -E "^device" | sed -E "s/^device \`([^\`]+)'.*/\1/")
+    if [ -z "$devices" ]; then
+        echo "❌ Сканеры не найдены. Проверьте подключение и совместимость."
+        return 1
+    fi
+    IFS=$'\n' read -d '' -r -a dev_array <<< "$devices"
+    count=${#dev_array[@]}
+    echo "Доступные устройства:"
+    for i in "${!dev_array[@]}"; do
+        echo "$((i+1))) ${dev_array[$i]}"
+    done
+    read -p "Введите номер устройства для запоминания (или 0 для пропуска): " choice
+    if [ "$choice" -eq 0 ]; then
+        echo "Пропускаем запоминание."
+        return 0
+    fi
+    if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le "$count" ]; then
+        selected="${dev_array[$((choice-1))]}"
+        echo "export SANE_DEFAULT_DEVICE=\"$selected\"" >> /home/$USER_NAME/.profile
+        echo "✅ Устройство '$selected' запомнено в ~/.profile"
+        echo "⚠️  Чтобы изменения вступили силу, выйдите из системы и зайдите снова (или выполните: source ~/.profile)"
+    else
+        echo "❌ Неверный номер. Попробуйте снова."
+        choose_device
+    fi
 }
 
-table inet filter {
-    chain input {
-        type filter hook input priority filter;
-    }
-    chain forward {
-        type filter hook forward priority filter;
-    }
-    chain output {
-        type filter hook output priority filter;
-    }
-}
-EOF
+# Предложение запомнить устройство
+read -p "Хотите запомнить выбранный сканер, чтобы не выбирать его каждый раз? (y/n): " remember
+if [[ "$remember" =~ ^[Yy]$ ]]; then
+    choose_device
+else
+    echo "Позже вы можете вручную добавить переменную SANE_DEFAULT_DEVICE в ~/.profile"
+fi
 
-echo "Конфигурация nftables создана"
+# Ручное добавление сетевого сканера по IP
+echo ""
+read -p "Если у вас сетевой сканер с известным IP-адресом, введите его (например, 192.168.1.100). Иначе нажмите Enter: " ipaddr
+if [ -n "$ipaddr" ]; then
+    echo "Добавляем IP в /etc/sane.d/net.conf ..."
+    echo "$ipaddr" >> /etc/sane.d/net.conf
+    if ! grep -q "^net" /etc/sane.d/dll.conf; then
+        echo "net" >> /etc/sane.d/dll.conf
+        echo "Бэкенд 'net' активирован."
+    fi
+    echo "✅ IP $ipaddr добавлен. Проверьте работу сканера после перезагрузки сеанса."
+fi
 
-# 10. Настройка часового пояса (Красноярск)
-echo "10. Настройка часового пояса..."
-timedatectl set-timezone Asia/Krasnoyarsk
-
-echo "========================================"
-echo "Настройка ISP завершена!"
-echo "========================================"
-rm -r /root/demo
+echo ""
+echo "=== ✅ Настройка завершена ==="
+echo "1️⃣ Перезагрузите сеанс пользователя $USER_NAME (выйдите и зайдите заново)."
+echo "2️⃣ После перезагрузки проверьте сканер командой: scanimage -L"
+echo "3️⃣ Запустите Simple Scan из меню приложений."
